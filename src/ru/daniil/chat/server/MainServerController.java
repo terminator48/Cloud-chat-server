@@ -26,7 +26,6 @@ import static ru.daniil.chat.ConsoleHandler.success;
  */
 public class MainServerController extends Thread {
 
-    public final boolean SSL = System.getProperty("ssl") != null;
     public final int PORT = Integer.parseInt(System.getProperty("port", "8007"));
     public EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     public EventLoopGroup workerGroup = new NioEventLoopGroup();

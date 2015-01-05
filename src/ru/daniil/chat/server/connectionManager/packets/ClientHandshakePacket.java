@@ -5,33 +5,49 @@
  */
 package ru.daniil.chat.server.connectionManager.packets;
 
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static ru.daniil.chat.ConsoleHandler.error;
+
+import ru.daniil.chat.server.connectionManager.ConnectedClient;
+import ru.daniil.chat.server.connectionManager.ConnectionRouter;
+import ru.daniil.chat.server.connectionManager.packetEngine.ClientPacket;
+
 /**
- *
  * @author Daniil
  */
-public class ClientHandshakePacket extends Packet{
+public class ClientHandshakePacket extends ClientPacket {
 
-    public ClientHandshakePacket(Byte[] data, Byte[] crypt, String clientId) {
-        super(data, crypt, clientId);
+    public ClientHandshakePacket(int crypt, String data, String clientId) {
+        super(crypt, data, clientId);
     }
+
     @Override
     public void process() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public Byte[] asBytes() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        ConnectedClient cc = ConnectionRouter.getClient(clientId);
+        if (cc != null) {
+            if (cc.getState() == ConnectedClient.ClientState.CONNECTED || cc.getState() == ConnectedClient.ClientState.CONNECTED) {
+                String[] dataProtocol = data.split(":");
+                if (dataProtocol.length == 3) {
+                    cc.APIVersion = dataProtocol[0];
+                    cc.DeviceID = dataProtocol[1];
+                    cc.DeviceName = dataProtocol[2];
+                    cc.setState(ConnectedClient.ClientState.HANDSHAKED);
+                    cc.sendPacket(new ServerHandshake());
+                }
+            }
+        } else error("Dropped packet ClientHandshakePacket: no clients found");
     }
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "ClientHandshakePacket";
     }
 
     @Override
-    public PacketSide getType() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public int getID() {
+        return 0;
     }
-    
 }
